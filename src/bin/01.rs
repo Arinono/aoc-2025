@@ -2,10 +2,6 @@ use std::str::FromStr;
 
 advent_of_code::solution!(1);
 
-const MAX_ROTATIONS: u8 = 99;
-const MIN_ROTATIONS: u8 = 0;
-const START: u8 = 50;
-
 /// L50 means left 50 steps
 /// R50 means right 50 steps
 #[derive(Debug, PartialEq)]
@@ -40,42 +36,48 @@ fn parse_directions(input: &str) -> Vec<Direction> {
         .collect()
 }
 
-fn compute_rotations(directions: &[Direction]) -> Vec<u8> {
-    let mut rotations: Vec<u8> = vec![START];
+pub fn part_one(input: &str) -> Option<u64> {
+    let mut sum_zeros = 0u16;
+    let mut rotation = 50i16;
+    let directions = parse_directions(input);
 
     for direction in directions {
-        match direction {
-            Direction::Left(steps) => {
-                let mut target: i16 = (*rotations.last().unwrap() as i16) - (*steps as i16);
-                while target < (MIN_ROTATIONS).into() {
-                    target += MAX_ROTATIONS as i16 + 1;
-                }
-                rotations.push(target as u8);
-            }
-            Direction::Right(steps) => {
-                let mut target: i16 = (*rotations.last().unwrap() as i16) + (*steps as i16);
-                while target > (MAX_ROTATIONS).into() {
-                    target -= MAX_ROTATIONS as i16 + 1;
-                }
-                rotations.push(target as u8);
-            }
+        rotation = match direction {
+            Direction::Left(value) => rotation - (value as i16),
+            Direction::Right(value) => rotation + (value as i16),
+        };
+        if rotation % 100 == 0 {
+            sum_zeros += 1;
         }
     }
-    rotations
-}
-
-pub fn part_one(input: &str) -> Option<u64> {
-    let directions = parse_directions(input);
-    let rotations = compute_rotations(&directions);
-
-    let rotations = rotations.into_iter();
-    let sum_zeros = rotations.filter(|&x| x == 0).count();
-
     Some(sum_zeros as u64)
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    None
+    let mut ticks = 0u64;
+    let mut rotation = 50i16;
+    let directions = parse_directions(input);
+
+    for direction in directions {
+        let start = rotation;
+        rotation = match direction {
+            Direction::Left(value) => rotation - (value as i16),
+            Direction::Right(value) => rotation + (value as i16),
+        };
+        if start < rotation {
+            let first = ((start + 1) as f32 / 100.0).ceil() as i16 * 100;
+            if first <= rotation {
+                ticks += ((rotation - first) / 100 + 1) as u64;
+            }
+        } else {
+            let last = ((start - 1) as f32 / 100.0).floor() as i16 * 100;
+            if last >= rotation {
+                ticks += ((last - rotation) / 100 + 1) as u64;
+            }
+        }
+    }
+
+    Some(ticks)
 }
 
 #[cfg(test)]
@@ -114,6 +116,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(6));
     }
 }
