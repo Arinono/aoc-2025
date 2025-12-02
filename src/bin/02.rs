@@ -77,7 +77,7 @@ pub fn part_one(input: &str) -> Option<u64> {
 
     let ids = ranges
         .0
-        .iter()
+        .into_par_iter()
         .flat_map(|range| range.get_dupes())
         .collect::<Vec<u64>>();
 
@@ -89,7 +89,7 @@ pub fn part_two(input: &str) -> Option<u64> {
 
     let ids = ranges
         .0
-        .iter()
+        .into_par_iter()
         .flat_map(|range| range.get_repeats())
         .collect::<Vec<u64>>();
 
