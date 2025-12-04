@@ -45,8 +45,8 @@ impl Dupes for Range<u64> {
             .flat_map(|i| {
                 let istr = i.to_string();
                 if istr.len() % 2 == 0 {
-                    let (left, right) = istr.split_at(i.to_string().len() / 2);
-                    if left.parse::<u64>().unwrap() == right.parse::<u64>().unwrap() {
+                    let (left, right) = istr.split_at(istr.len() / 2);
+                    if left == right {
                         return Some(i);
                     }
                 }
@@ -60,7 +60,7 @@ impl Dupes for Range<u64> {
             .into_par_iter()
             .flat_map(|i| {
                 let istr = i.to_string();
-                let doubled = format!("{istr}{istr}");
+                let doubled = format!("{istr}{i}");
 
                 if doubled[1..doubled.len() - 1].contains(&istr) {
                     return Some(i);
@@ -79,9 +79,9 @@ pub fn part_one(input: &str) -> Option<u64> {
         .0
         .into_par_iter()
         .flat_map(|range| range.get_dupes())
-        .collect::<Vec<u64>>();
+        .sum();
 
-    Some(ids.iter().sum())
+    Some(ids)
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
@@ -91,9 +91,9 @@ pub fn part_two(input: &str) -> Option<u64> {
         .0
         .into_par_iter()
         .flat_map(|range| range.get_repeats())
-        .collect::<Vec<u64>>();
+        .sum();
 
-    Some(ids.iter().sum())
+    Some(ids)
 }
 
 #[cfg(test)]
